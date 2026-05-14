@@ -1,28 +1,37 @@
+// pkg/password/hasher.go
 package password
 
 import (
+	"fmt"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
-type PasswordHasher interface {
-	Hash(password string) (string, error)
-	Verify(password, hash string) bool
-}
-
-type BcryptHasher struct {
+// Hasher - сервис хеширования паролей
+type Hasher struct {
 	cost int
 }
 
-func NewBcryptHasher() *BcryptHasher {
-	return &BcryptHasher{cost: bcrypt.DefaultCost}
+// NewHasher создаёт новый экземпляр Hasher
+// cost - стоимость bcrypt (рекомендуется 12 для production)
+func NewHasher(cost int) *Hasher {
+	if cost < bcrypt.MinCost || cost > bcrypt.MaxCost {
+		cost = bcrypt.DefaultCost
+	}
+	return &Hasher{cost: cost}
 }
 
-func (h *BcryptHasher) Hash(password string) (string, error) {
+// HashPassword хеширует пароль с использованием bcrypt
+func (h *Hasher) HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), h.cost)
-	return string(bytes), err
+	if err != nil {
+		return "", fmt.Errorf("failed to hash password: %w", err)
+	}
+	return string(bytes), nil
 }
 
-func (h *BcryptHasher) Verify(password, hash string) bool {
+// VerifyPassword проверяет соответствие пароля хешу
+func (h *Hasher) VerifyPassword(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }

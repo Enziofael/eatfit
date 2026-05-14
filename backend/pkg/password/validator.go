@@ -1,52 +1,78 @@
+// pkg/password/validator.go
 package password
 
 import (
 	"fmt"
-	"unicode"
+	"regexp"
 )
 
-type PasswordValidator struct{}
-
-func NewPasswordValidator() *PasswordValidator {
-	return &PasswordValidator{}
+// ValidationError описывает ошибку валидации пароля
+type ValidationError struct {
+	Field   string
+	Message string
 }
 
-func (v *PasswordValidator) Validate(password string) error {
-	if len(password) < 5 {
-		return fmt.Errorf("password must be at least 5 characters")
+func (e *ValidationError) Error() string {
+	return fmt.Sprintf("%s: %s", e.Field, e.Message)
+}
+
+// Validator - валидатор паролей
+type Validator struct {
+	minLength          int
+	requireUppercase   bool
+	requireLowercase   bool
+	requireDigit       bool
+	requireSpecialChar bool
+	specialChars       string
+}
+
+// NewValidator создаёт валидатор с настройками по умолчанию
+func NewValidator() *Validator {
+	return &Validator{
+		minLength:          5,
+		requireUppercase:   true,
+		requireLowercase:   true,
+		requireDigit:       true,
+		requireSpecialChar: true,
+		specialChars:       `[!@#\$%\^&\*\(\),\.\?":\{\}\|<>]`,
 	}
+}
 
-	var (
-		hasUpper   bool
-		hasLower   bool
-		hasDigit   bool
-		hasSpecial bool
-	)
-
-	for _, char := range password {
-		switch {
-		case unicode.IsUpper(char):
-			hasUpper = true
-		case unicode.IsLower(char):
-			hasLower = true
-		case unicode.IsDigit(char):
-			hasDigit = true
-		case unicode.IsPunct(char) || unicode.IsSymbol(char):
-			hasSpecial = true
+// ValidatePassword проверяет пароль на соответствие требованиям
+func (v *Validator) ValidatePassword(password string) error {
+	if len(password) < v.minLength {
+		return &ValidationError{
+			Field:   "password",
+			Message: fmt.Sprintf("password must be at least %d characters long", v.minLength),
 		}
 	}
 
-	if !hasUpper {
-		return fmt.Errorf("password must contain at least one uppercase letter")
+	if v.requireUppercase && !regexp.MustCompile(`[A-Z]`).MatchString(password) {
+		return &ValidationError{
+			Field:   "password",
+			Message: "password must contain at least one uppercase letter",
+		}
 	}
-	if !hasLower {
-		return fmt.Errorf("password must contain at least one lowercase letter")
+
+	if v.requireLowercase && !regexp.MustCompile(`[a-z]`).MatchString(password) {
+		return &ValidationError{
+			Field:   "password",
+			Message: "password must contain at least one lowercase letter",
+		}
 	}
-	if !hasDigit {
-		return fmt.Errorf("password must contain at least one digit")
+
+	if v.requireDigit && !regexp.MustCompile(`[0-9]`).MatchString(password) {
+		return &ValidationError{
+			Field:   "password",
+			Message: "password must contain at least one digit",
+		}
 	}
-	if !hasSpecial {
-		return fmt.Errorf("password must contain at least one special character")
+
+	if v.requireSpecialChar && !regexp.MustCompile(v.specialChars).MatchString(password) {
+		return &ValidationError{
+			Field:   "password",
+			Message: "password must contain at least one special character",
+		}
 	}
 
 	return nil

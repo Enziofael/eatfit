@@ -1,79 +1,126 @@
+// internal/config/config.go
 package config
 
 import (
+	"fmt"
 	"os"
 	"strconv"
+	"time"
+
+	"github.com/joho/godotenv"
 )
 
+// Config содержит всю конфигурацию приложения
 type Config struct {
-	// Server
+	// Сервер
 	GRPCPort string
 	HTTPPort string
 
-	// Database
-	DBHost     string
-	DBPort     int
-	DBUser     string
-	DBPassword string
-	DBName     string
-
-	// Redis
-	RedisHost     string
-	RedisPort     int
-	RedisPassword string
+	// Базы данных
+	PostgresDSN string
+	RedisAddr   string
+	RedisPass   string
+	RedisDB     int
 
 	// JWT
 	JWTSecret            string
-	AccessTokenDuration  int // minutes
-	RefreshTokenDuration int // days
+	AccessTokenDuration  time.Duration
+	RefreshTokenDuration time.Duration
 
-	// SMTP
-	SMTPHost     string
-	SMTPPort     int
-	SMTPUsername string
-	SMTPPassword string
-	SMTPSender   string
+	// Email (SMTP)
+	SMTPHost      string
+	SMTPPort      int
+	SMTPUser      string
+	SMTPPass      string
+	EmailFrom     string
+	EmailFromName string
+
+	// Приложение
+	AppEnv   string // "development", "production"
+	AppDebug bool
 }
 
-func Load() *Config {
-	return &Config{
+// Load загружает конфигурацию из .env файла и переменных окружения
+func Load() (*Config, error) {
+	// Загружаем .env из корня проекта, если существует
+	// Игнорируем ошибку - .env опционален в production
+	_ = godotenv.Load("../../.env")
+	_ = godotenv.Load(".env")
+
+	cfg := &Config{
+		// Сервер
 		GRPCPort: getEnv("BACKEND_GRPC_PORT", "50051"),
 		HTTPPort: getEnv("BACKEND_HTTP_PORT", "8080"),
 
-		DBHost:     getEnv("POSTGRES_HOST", "localhost"),
-		DBPort:     getEnvInt("POSTGRES_PORT", 5432),
-		DBUser:     getEnv("POSTGRES_USER", "eatfit_user"),
-		DBPassword: getEnv("POSTGRES_PASSWORD", "eatfit_pass"),
-		DBName:     getEnv("POSTGRES_DB", "eatfit"),
+		// PostgreSQL
+		PostgresDSN: buildPostgresDSN(),
 
-		RedisHost:     getEnv("REDIS_HOST", "localhost"),
-		RedisPort:     getEnvInt("REDIS_PORT", 6379),
-		RedisPassword: getEnv("REDIS_PASSWORD", ""),
+		// Redis
+		RedisAddr: fmt.Sprintf("%s:%s",
+			getEnv("REDIS_HOST", "localhost"),
+			getEnv("REDIS_PORT", "6379"),
+		),
+		RedisPass: getEnv("REDIS_PASSWORD", ""),
+		RedisDB:   0,
 
-		JWTSecret:            getEnv("JWT_SECRET", "change_me"),
-		AccessTokenDuration:  getEnvInt("ACCESS_TOKEN_DURATION", 15),
-		RefreshTokenDuration: getEnvInt("REFRESH_TOKEN_DURATION", 30),
+		// JWT
+		JWTSecret:            getEnv("JWT_SECRET", "default-secret-change-in-production"),
+		AccessTokenDuration:  15 * time.Minute,
+		RefreshTokenDuration: 30 * 24 * time.Hour, // 30 дней
 
-		SMTPHost:     getEnv("SMTP_HOST", ""),
-		SMTPPort:     getEnvInt("SMTP_PORT", 587),
-		SMTPUsername: getEnv("SMTP_USERNAME", ""),
-		SMTPPassword: getEnv("SMTP_PASSWORD", ""),
-		SMTPSender:   getEnv("SMTP_SENDER", ""),
+		// Email
+		SMTPHost:      getEnv("SMTP_HOST", "localhost"),
+		SMTPPort:      getEnvAsInt("SMTP_PORT", 1025),
+		SMTPUser:      getEnv("SMTP_USER", ""),
+		SMTPPass:      getEnv("SMTP_PASS", ""),
+		EmailFrom:     getEnv("EMAIL_FROM", "noreply@eatfit.local"),
+		EmailFromName: "Eatfit",
+
+		// Приложение
+		AppEnv:   getEnv("APP_ENV", "development"),
+		AppDebug: getEnv("APP_DEBUG", "true") == "true",
 	}
+
+	// Валидация обязательных полей
+	if cfg.AppEnv == "production" {
+		if cfg.JWTSecret == "default-secret-change-in-production" {
+			return nil, fmt.Errorf("JWT_SECRET must be set in production")
+		}
+		if cfg.PostgresDSN == "" {
+			return nil, fmt.Errorf("database configuration is required")
+		}
+	}
+
+	return cfg, nil
 }
 
-func getEnv(key, fallback string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
+// getEnv возвращает значение переменной окружения или значение по умолчанию
+func getEnv(key, defaultVal string) string {
+	if val, exists := os.LookupEnv(key); exists && val != "" {
+		return val
 	}
-	return fallback
+	return defaultVal
 }
 
-func getEnvInt(key string, fallback int) int {
-	if value := os.Getenv(key); value != "" {
-		if intVal, err := strconv.Atoi(value); err == nil {
+// buildPostgresDSN формирует строку подключения к PostgreSQL
+func buildPostgresDSN() string {
+	host := getEnv("POSTGRES_HOST", "localhost")
+	port := getEnv("POSTGRES_PORT", "5432")
+	user := getEnv("POSTGRES_USER", "eatfit_user")
+	pass := getEnv("POSTGRES_PASSWORD", "eatfit_pass")
+	dbname := getEnv("POSTGRES_DB", "eatfit")
+
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		user, pass, host, port, dbname,
+	)
+}
+
+func getEnvAsInt(key string, defaultVal int) int {
+	if val, exists := os.LookupEnv(key); exists && val != "" {
+		if intVal, err := strconv.Atoi(val); err == nil {
 			return intVal
 		}
 	}
-	return fallback
+	return defaultVal
 }

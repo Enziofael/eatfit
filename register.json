@@ -1,0 +1,6 @@
+{
+  "email": "test@example.com",
+  "login": "testuser",
+  "password": "Test1!pass",
+  "password_confirmation": "Test1!pass"
+}

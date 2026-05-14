@@ -1,0 +1,233 @@
+# ============================================
+# General
+# ============================================
+.DS_Store
+*.log
+*.tmp
+*.swp
+*.bak
+*.orig
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ============================================
+# IDE & Editors
+# ============================================
+# JetBrains IDEs (Android Studio, IntelliJ, GoLand)
+.idea/
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# ============================================
+# Android
+# ============================================
+android/*/*.iml
+android/*/.gradle
+android/*/local.properties
+android/*/.idea/caches
+android/*/.idea/libraries
+android/*/.idea/modules.xml
+android/*/.idea/workspace.xml
+android/*/.idea/navEditor.xml
+android/*/.idea/assetWizardSettings.xml
+android/*/*.DS_Store
+android/*/build
+android/*/captures
+android/*/*.externalNativeBuild
+android/*/*.cxx
+android/*/*local.properties
+android/*/.idea/
+android/*/app/build/
+android/*/app/release/
+android/*/build/
+android/*/.navigation/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+bin/
+gen/
+out/
+.navigation/
+captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+
+# Android specific
+*.hprof
+*.mim
+*.sym
+*.wasm
+*.wast
+*.classpath
+*.project
+*.settings/
+*.eml
+*.pdb
+
+# ============================================
+# Go
+# ============================================
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+backend/cmd/eatfit/eatfit
+backend/build/
+
+# Test binary
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
+
+# Dependency directories
+vendor/
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# ============================================
+# C# (.NET/WPF)
+# ============================================
+desktop/bin/
+desktop/obj/
+desktop/packages/
+desktop/.vs/
+desktop/*.user
+desktop/*.suo
+desktop/*.cachefile
+desktop/*.DotSettings.user
+desktop/App_Data/
+desktop/*.bak
+desktop/*.nupkg
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+# NuGet
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+# ============================================
+# Docker
+# ============================================
+docker-compose.override.yml
+.env
+*.env.local
+*.env.*.local
+
+# ============================================
+# Environment & Config
+# ============================================
+*.env
+!.env.example
+*.env.local
+*.env.*.local
+config.local.*
+secrets.*
+credentials.*
+*_credentials.*
+*.pem
+*.key
+*.crt
+*.pfx
+*.p12
+
+# ============================================
+# Database
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+pgdata/
+*.backup
+*.dump
+
+# ============================================
+# Proto generated files
+# ============================================
+backend/api/gen/
+*.pb.go
+*_grpc.pb.go
+*.pb.gw.go
+
+# ============================================
+# Postman
+# ============================================
+postman/environments/*local*
+postman/globals/*local*
+
+# ============================================
+# OS specific
+# ============================================
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+$RECYCLE.BIN/
+Thumbs.db
+ehthumbs.db
+*.stackdump
+[Bb]in
+[Dd]ebug*/
+[Rr]elease*/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk

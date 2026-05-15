@@ -32,25 +32,45 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        OutlinedTextField(state.email, viewModel::onEmailChange, "Email", Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(12.dp))
-        OutlinedTextField(state.login, viewModel::onLoginChange, "Login", Modifier.fillMaxWidth())
-        Spacer(modifier = Modifier.height(12.dp))
         OutlinedTextField(
-            state.password, viewModel::onPasswordChange, "Password", Modifier.fillMaxWidth(),
+            value = state.email,
+            onValueChange = viewModel::onEmailChange,
+            label = { Text("Email") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedTextField(
+            value = state.login,
+            onValueChange = viewModel::onLoginChange,
+            label = { Text("Login") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedTextField(
+            value = state.password,
+            onValueChange = viewModel::onPasswordChange,
+            label = { Text("Password") },
+            modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
         Spacer(modifier = Modifier.height(12.dp))
+
         OutlinedTextField(
-            state.confirmPassword, viewModel::onConfirmPasswordChange, "Confirm Password", Modifier.fillMaxWidth(),
+            value = state.confirmPassword,
+            onValueChange = viewModel::onConfirmPasswordChange,
+            label = { Text("Confirm Password") },
+            modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
         )
 
-        if (state.error != null) {
+        val error = state.error
+        if (error != null) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(state.error!!, color = RedError, fontSize = 12.sp)
+            Text(error, color = RedError, fontSize = 12.sp)
         }
 
         Spacer(modifier = Modifier.height(24.dp))

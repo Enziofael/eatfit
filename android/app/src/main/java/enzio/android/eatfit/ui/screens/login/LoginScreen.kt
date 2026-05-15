@@ -43,7 +43,8 @@ fun LoginScreen(
             onValueChange = viewModel::onLoginIdentifierChange,
             label = { Text("Email or Login") },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            enabled = !state.isLoading
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -55,13 +56,15 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            enabled = !state.isLoading
         )
 
-        if (state.error != null) {
+        val error = state.error
+        if (error != null) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = state.error,
+                text = error,
                 color = RedError,
                 fontSize = 12.sp
             )
@@ -77,20 +80,26 @@ fun LoginScreen(
             enabled = !state.isLoading,
             colors = ButtonDefaults.buttonColors(containerColor = PurplePrimary)
         ) {
-            if (state.isLoading) {
-                CircularProgressIndicator(color = androidx.compose.ui.graphics.Color.White, modifier = Modifier.size(24.dp))
-            } else {
-                Text("Login", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-            }
+            Text(
+                text = if (state.isLoading) "Loading..." else "Login",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        TextButton(onClick = onRegisterClick) {
+        TextButton(
+            onClick = onRegisterClick,
+            enabled = !state.isLoading
+        ) {
             Text("Create new account", color = PurplePrimary)
         }
 
-        TextButton(onClick = onForgotPasswordClick) {
+        TextButton(
+            onClick = onForgotPasswordClick,
+            enabled = !state.isLoading
+        ) {
             Text("Forgot password?", color = GraySubText, fontSize = 12.sp)
         }
     }

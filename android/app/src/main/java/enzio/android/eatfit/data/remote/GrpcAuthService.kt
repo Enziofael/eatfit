@@ -3,11 +3,13 @@ package enzio.android.eatfit.data.remote
 import enzio.android.eatfit.data.model.AuthResult
 import enzio.android.eatfit.data.model.LoginRequest
 import enzio.android.eatfit.data.model.RegisterRequest
-import enzio.android.eatfit.proto.eatfit.v1.AuthServiceGrpc
-import enzio.android.eatfit.proto.eatfit.v1.ForgotPasswordRequest
-import enzio.android.eatfit.proto.eatfit.v1.LogoutRequest
-import enzio.android.eatfit.proto.eatfit.v1.ResetPasswordRequest
-import enzio.android.eatfit.proto.eatfit.v1.VerifyEmailRequest
+import enzio.android.eatfit.proto.AuthServiceGrpc
+import enzio.android.eatfit.proto.ForgotPasswordRequest
+import enzio.android.eatfit.proto.LogoutRequest
+import enzio.android.eatfit.proto.RegisterRequest as ProtoRegisterRequest
+import enzio.android.eatfit.proto.ResetPasswordRequest
+import enzio.android.eatfit.proto.VerifyEmailRequest
+import enzio.android.eatfit.proto.LoginRequest as ProtoLoginRequest
 import io.grpc.ManagedChannel
 import io.grpc.okhttp.OkHttpChannelBuilder
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +17,7 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 class GrpcAuthService(
-    private val serverUrl: String = "10.0.2.2",
+    private val serverUrl: String = "192.168.0.10",
     private val port: Int = 50051
 ) {
 
@@ -23,13 +25,15 @@ class GrpcAuthService(
         .forAddress(serverUrl, port)
         .usePlaintext()
         .keepAliveTime(30, TimeUnit.SECONDS)
+        .keepAliveTimeout(10, TimeUnit.SECONDS)
+        .keepAliveWithoutCalls(true)
         .build()
 
     private val stub = AuthServiceGrpc.newBlockingStub(channel)
 
     suspend fun register(request: RegisterRequest): AuthResult = withContext(Dispatchers.IO) {
         try {
-            val protoRequest = eatfit.v1.RegisterRequest.newBuilder()
+            val protoRequest = ProtoRegisterRequest.newBuilder()
                 .setEmail(request.email)
                 .setLogin(request.login)
                 .setPassword(request.password)
@@ -44,7 +48,7 @@ class GrpcAuthService(
                 userId = response.userId
             )
         } catch (e: Exception) {
-            AuthResult(success = false, message = e.message ?: "Connection error")
+            AuthResult(success = false, message = "Error: ${e.message}")
         }
     }
 
@@ -62,15 +66,15 @@ class GrpcAuthService(
                 message = response.message
             )
         } catch (e: Exception) {
-            AuthResult(success = false, message = e.message ?: "Error")
+            AuthResult(success = false, message = "Error: ${e.message}")
         }
     }
 
     suspend fun login(request: LoginRequest): AuthResult = withContext(Dispatchers.IO) {
         try {
-            val builder = eatfit.v1.LoginRequest.newBuilder()
+            val builder = ProtoLoginRequest.newBuilder()
                 .setPassword(request.password)
-                .setDeviceInfo("Android")
+                .setDeviceInfo("Android Emulator")
 
             if (request.loginIdentifier.contains('@')) {
                 builder.email = request.loginIdentifier
@@ -78,7 +82,9 @@ class GrpcAuthService(
                 builder.login = request.loginIdentifier
             }
 
-            val response = stub.login(builder.build())
+            val response = stub
+                .withDeadlineAfter(10, TimeUnit.SECONDS)
+                .login(builder.build())
 
             AuthResult(
                 success = true,
@@ -89,7 +95,7 @@ class GrpcAuthService(
                 login = response.user.login
             )
         } catch (e: Exception) {
-            AuthResult(success = false, message = e.message ?: "Invalid credentials")
+            AuthResult(success = false, message = "Login failed: ${e.message}")
         }
     }
 
@@ -107,7 +113,7 @@ class GrpcAuthService(
                 resetToken = response.resetToken
             )
         } catch (e: Exception) {
-            AuthResult(success = false, message = e.message ?: "Error")
+            AuthResult(success = false, message = "Error: ${e.message}")
         }
     }
 
@@ -127,16 +133,22 @@ class GrpcAuthService(
                 message = response.message
             )
         } catch (e: Exception) {
-            AuthResult(success = false, message = e.message ?: "Error")
+            AuthResult(success = false, message = "Error: ${e.message}")
         }
     }
 
     suspend fun logout(refreshToken: String) {
-        try {
-            val request = LogoutRequest.newBuilder()
-                .setRefreshToken(refreshToken)
-                .build()
-            stub.logout(request)
-        } catch (_: Exception) { }
+        withContext(Dispatchers.IO) {
+            try {
+                val request = LogoutRequest.newBuilder()
+                    .setRefreshToken(refreshToken)
+                    .build()
+                stub
+                    .withDeadlineAfter(5, java.util.concurrent.TimeUnit.SECONDS)
+                    .logout(request)
+            } catch (_: Exception) {
+                // Игнорируем ошибки
+            }
+        }
     }
 }

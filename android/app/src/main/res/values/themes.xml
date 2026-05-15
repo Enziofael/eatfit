@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Eatfit" parent="android:Theme.Material.Light.NoActionBar">
-        <!-- Можно оставить пустым или добавить кастомизацию -->
+    <style name="Theme.Eatfit" parent="Theme.Material3.DayNight.NoActionBar">
     </style>
 </resources>

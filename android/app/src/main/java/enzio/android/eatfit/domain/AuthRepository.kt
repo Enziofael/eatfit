@@ -41,7 +41,10 @@ class AuthRepository(
     }
 
     suspend fun logout(refreshToken: String) {
-        grpcService.logout(refreshToken)
-        sessionManager.clearSession()
+        try {
+            grpcService.logout(refreshToken)
+        } finally {
+            sessionManager.clearSession()
+        }
     }
 }

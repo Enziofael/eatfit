@@ -1,4 +1,3 @@
-// ui/screens/main/MainScreen.kt
 package enzio.android.eatfit.ui.screens.main
 
 import androidx.compose.foundation.layout.*
@@ -17,20 +16,39 @@ fun MainScreen(
     refreshToken: String,
     onLogout: () -> Unit
 ) {
+    var isLoading by remember { mutableStateOf(false) }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Welcome to Eatfit!", fontSize = 32.sp, fontWeight = FontWeight.Bold, color = PurplePrimary)
+        Text(
+            text = "Welcome to Eatfit!",
+            fontSize = 32.sp,
+            fontWeight = FontWeight.Bold,
+            color = PurplePrimary
+        )
 
         Spacer(modifier = Modifier.height(32.dp))
 
         Button(
-            onClick = { viewModel.logout(refreshToken, onLogout) },
-            modifier = Modifier.width(200.dp).height(48.dp)
+            onClick = {
+                isLoading = true
+                viewModel.logout(refreshToken) {
+                    isLoading = false
+                    onLogout()
+                }
+            },
+            modifier = Modifier
+                .width(200.dp)
+                .height(48.dp),
+            enabled = !isLoading
         ) {
-            Text("Logout", fontWeight = FontWeight.Bold)
+            Text(
+                text = if (isLoading) "Logging out..." else "Logout",
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

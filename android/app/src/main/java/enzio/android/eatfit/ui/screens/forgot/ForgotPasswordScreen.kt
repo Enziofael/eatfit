@@ -1,4 +1,3 @@
-// ui/screens/forgot/ForgotPasswordScreen.kt
 package enzio.android.eatfit.ui.screens.forgot
 
 import androidx.compose.foundation.layout.*
@@ -29,15 +28,22 @@ fun ForgotPasswordScreen(
         Text("Enter your email or login to receive reset code", color = GrayText)
         Spacer(modifier = Modifier.height(24.dp))
 
-        OutlinedTextField(state.loginIdentifier, viewModel::onIdentifierChange, "Email or Login", Modifier.fillMaxWidth())
+        OutlinedTextField(
+            value = state.loginIdentifier,
+            onValueChange = viewModel::onIdentifierChange,
+            label = { Text("Email or Login") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
-        if (state.error != null) {
+        val error = state.error
+        if (error != null) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(state.error!!, color = RedError, fontSize = 12.sp)
+            Text(error, color = RedError, fontSize = 12.sp)
         }
-        if (state.message != null) {
+        val message = state.message
+        if (message != null) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(state.message!!, color = GreenSuccess, fontSize = 12.sp)
+            Text(message, color = GreenSuccess, fontSize = 12.sp)
         }
 
         Spacer(modifier = Modifier.height(24.dp))

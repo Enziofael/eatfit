@@ -1,4 +1,3 @@
-// ui/screens/reset/ResetPasswordScreen.kt
 package enzio.android.eatfit.ui.screens.reset
 
 import androidx.compose.foundation.layout.*
@@ -31,18 +30,36 @@ fun ResetPasswordScreen(
         Text("Reset Password", fontSize = 24.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(24.dp))
 
-        OutlinedTextField(state.code, viewModel::onCodeChange, "Verification Code", Modifier.fillMaxWidth(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
+        OutlinedTextField(
+            value = state.code,
+            onValueChange = viewModel::onCodeChange,
+            label = { Text("Verification Code") },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
         Spacer(modifier = Modifier.height(12.dp))
-        OutlinedTextField(state.newPassword, viewModel::onPasswordChange, "New Password", Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation())
-        Spacer(modifier = Modifier.height(12.dp))
-        OutlinedTextField(state.confirmPassword, viewModel::onConfirmChange, "Confirm Password", Modifier.fillMaxWidth(),
-            visualTransformation = PasswordVisualTransformation())
 
-        if (state.error != null) {
+        OutlinedTextField(
+            value = state.newPassword,
+            onValueChange = viewModel::onPasswordChange,
+            label = { Text("New Password") },
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation = PasswordVisualTransformation()
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedTextField(
+            value = state.confirmPassword,
+            onValueChange = viewModel::onConfirmChange,
+            label = { Text("Confirm Password") },
+            modifier = Modifier.fillMaxWidth(),
+            visualTransformation = PasswordVisualTransformation()
+        )
+
+        val error = state.error
+        if (error != null) {
             Spacer(modifier = Modifier.height(8.dp))
-            Text(state.error!!, color = RedError, fontSize = 12.sp)
+            Text(error, color = RedError, fontSize = 12.sp)
         }
 
         Spacer(modifier = Modifier.height(24.dp))

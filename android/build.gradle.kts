@@ -1,4 +1,6 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+// android/build.gradle.kts
 plugins {
-    alias(libs.plugins.android.application) apply false
+    id("com.android.application") version "8.2.2" apply false
+    id("org.jetbrains.kotlin.android") version "1.9.22" apply false
+    id("com.google.protobuf") version "0.9.4" apply false
 }

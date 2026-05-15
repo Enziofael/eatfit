@@ -1,54 +1,88 @@
 package enzio.android.eatfit.ui.screens.main
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import enzio.android.eatfit.ui.screens.diary.DiaryScreen
+import enzio.android.eatfit.ui.screens.feed.FeedScreen
+import enzio.android.eatfit.ui.screens.meals.MealsScreen
+import enzio.android.eatfit.ui.screens.messages.MessagesScreen
+import enzio.android.eatfit.ui.screens.profile.ProfileScreen
 import enzio.android.eatfit.ui.theme.*
 
+enum class BottomNavItem(
+    val label: String,
+    val icon: ImageVector
+) {
+    FEED("Feed", Icons.Default.Home),
+    DIARY("Diary", Icons.Default.DateRange),
+    MEALS("Meals", Icons.Default.Restaurant),
+    MESSAGES("Messages", Icons.Default.Email),
+    PROFILE("Profile", Icons.Default.Person)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     viewModel: MainViewModel,
     refreshToken: String,
     onLogout: () -> Unit
 ) {
-    var isLoading by remember { mutableStateOf(false) }
+    var selectedTab by remember { mutableStateOf(BottomNavItem.FEED) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "Welcome to Eatfit!",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            color = PurplePrimary
-        )
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                BottomNavItem.entries.forEach { item ->
+                    NavigationBarItem(
+                        icon = { Icon(item.icon, contentDescription = item.label) },
+                        label = { Text(item.label, fontSize = 11.sp) },
+                        selected = selectedTab == item,
+                        onClick = { selectedTab = item }
+                    )
+                }
+            }
+        }
+    ) { paddingValues ->
+        Box(modifier = Modifier.padding(paddingValues)) {
+            when (selectedTab) {
+                BottomNavItem.FEED -> FeedScreen()
+                BottomNavItem.DIARY -> DiaryScreen()
+                BottomNavItem.MEALS -> MealsScreen()
+                BottomNavItem.MESSAGES -> MessagesScreen()
+                BottomNavItem.PROFILE -> ProfileScreen(
+                    onLogoutClick = { showLogoutDialog = true }
+                )
+            }
+        }
+    }
 
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Button(
-            onClick = {
-                isLoading = true
-                viewModel.logout(refreshToken) {
-                    isLoading = false
-                    onLogout()
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Logout") },
+            text = { Text("Are you sure you want to logout?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showLogoutDialog = false
+                    viewModel.logout(refreshToken, onLogout)
+                }) {
+                    Text("Yes")
                 }
             },
-            modifier = Modifier
-                .width(200.dp)
-                .height(48.dp),
-            enabled = !isLoading
-        ) {
-            Text(
-                text = if (isLoading) "Logging out..." else "Logout",
-                fontWeight = FontWeight.Bold
-            )
-        }
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text("No")
+                }
+            }
+        )
     }
 }

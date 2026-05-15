@@ -61,49 +61,29 @@ namespace EatfitDesktop.Views
             ContentArea.Content = new VerifyEmailView { DataContext = vm };
         }
 
-        private string? _resetToken;
-
         private void ShowForgotPasswordView()
         {
             var vm = new ForgotPasswordViewModel(_authService);
-            vm.ResetCodeSent += (s, data) =>
+            vm.ResetCodeSent += (s, identifier) =>
             {
-                _resetToken = data.ResetToken;
-
-                if (!string.IsNullOrEmpty(_resetToken))
-                {
-                    ShowResetPasswordView(_resetToken);
-                }
-                else
-                {
-                    MessageBox.Show("If account exists, reset code sent to email.",
-                        "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
+                MessageBox.Show("If account exists, reset code sent to email.",
+                    "Information", MessageBoxButton.OK, MessageBoxImage.Information);
             };
             vm.LoginRequested += (s, e) => ShowLoginView();
 
             ContentArea.Content = new ForgotPasswordView { DataContext = vm };
         }
 
-        private void ShowResetPasswordView(string resetToken)
-        {
-            var vm = new ResetPasswordViewModel(_authService);
-            vm.SetResetToken(resetToken);
-            vm.PasswordResetSuccess += (s, e) =>
-            {
-                MessageBox.Show("Password reset successfully!", "Success",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
-                ShowLoginView();
-            };
-            vm.LoginRequested += (s, e) => ShowLoginView();
-
-            ContentArea.Content = new ResetPasswordView { DataContext = vm };
-        }
-
         private void ShowMainView()
         {
-            var vm = new MainViewModel();
-            vm.LogoutRequested += async (s, e) =>
+            // Увеличиваем окно при входе
+            this.Width = 1000;
+            this.Height = 650;
+            this.WindowState = WindowState.Normal;
+            this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+
+            var view = new MainView();
+            view.LogoutRequested += async () =>
             {
                 if (!string.IsNullOrEmpty(_sessionService.RefreshToken))
                 {
@@ -111,10 +91,16 @@ namespace EatfitDesktop.Views
                 }
 
                 _sessionService.ClearSession();
+
+                // Возвращаем окно к размеру логина
+                this.Width = 420;
+                this.Height = 500;
+                this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+
                 ShowLoginView();
             };
 
-            ContentArea.Content = new MainView { DataContext = vm };
+            ContentArea.Content = view;
         }
     }
 }

@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -44,7 +43,6 @@ class MainActivity : ComponentActivity() {
         val resetPasswordViewModel = ResetPasswordViewModel(repository)
         val mainViewModel = MainViewModel(repository)
 
-        // Проверяем, залогинен ли пользователь
         val isLoggedIn = runBlocking { sessionManager.isLoggedIn.first() }
         val refreshToken = runBlocking { sessionManager.refreshToken.first() ?: "" }
         val startDestination = if (isLoggedIn) "main" else "login"

@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package eatfit.v1;
+
+option go_package = "github.com/Enziofael/eatfit/backend/api/gen/eatfit/v1;eatfitv1";
+
+import "google/protobuf/timestamp.proto";
+
+service DiaryService {
+    rpc AddConsumption(AddConsumptionRequest) returns (AddConsumptionResponse);
+    rpc ListConsumptions(ListConsumptionsRequest) returns (ListConsumptionsResponse);
+    rpc DeleteConsumption(DeleteConsumptionRequest) returns (DeleteConsumptionResponse);
+}
+
+message AddConsumptionRequest {
+    string user_id = 1;
+    string meal_id = 2;
+    string meal_name = 3;       // копируем название блюда
+    double amount = 4;           // граммы
+    double calories = 5;
+    double proteins = 6;
+    double fats = 7;
+    double carbs = 8;
+    double water = 9;
+}
+
+message AddConsumptionResponse {
+    bool success = 1;
+    ConsumptionRecord record = 2;
+}
+
+message ListConsumptionsRequest {
+    string user_id = 1;
+    int32 limit = 2;  // количество дней (по умолчанию 30)
+}
+
+message ListConsumptionsResponse {
+    repeated ConsumptionGroup groups = 1;  // сгруппировано по дням
+}
+
+message ConsumptionGroup {
+    string date = 1;  // YYYY-MM-DD
+    repeated ConsumptionRecord records = 2;
+}
+
+message DeleteConsumptionRequest {
+    string record_id = 1;
+}
+
+message DeleteConsumptionResponse {
+    bool success = 1;
+}
+
+message ConsumptionRecord {
+    string record_id = 1;
+    string meal_id = 2;
+    string meal_name = 3;
+    double amount = 4;
+    double calories = 5;
+    double proteins = 6;
+    double fats = 7;
+    double carbs = 8;
+    double water = 9;
+    google.protobuf.Timestamp consumed_at = 10;
+}

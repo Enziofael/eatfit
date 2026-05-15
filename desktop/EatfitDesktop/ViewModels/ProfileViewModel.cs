@@ -31,6 +31,13 @@ namespace EatfitDesktop.ViewModels
             set { _displayName = value; OnPropertyChanged(); }
         }
 
+        private string _login = "";
+        public string Login
+        {
+            get => _login;
+            set { _login = value; OnPropertyChanged(); }
+        }
+
         private string _bio = "";
         public string Bio
         {
@@ -73,7 +80,6 @@ namespace EatfitDesktop.ViewModels
             set { _birthDate = value; OnPropertyChanged(); }
         }
 
-        // Нормы
         private string _calories = "—";
         public string Calories
         {
@@ -120,20 +126,39 @@ namespace EatfitDesktop.ViewModels
             var profile = await _profileService.GetProfileAsync(userId);
             if (profile == null) return;
 
-            // Имя
+            // Имя и логин
             if (!string.IsNullOrEmpty(profile.FirstName) || !string.IsNullOrEmpty(profile.LastName))
             {
                 DisplayName = $"{profile.FirstName} {profile.LastName}".Trim();
+                Login = $"@{profile.Login}";
             }
             else
             {
                 DisplayName = profile.Login;
+                Login = "";
             }
 
             Bio = profile.Bio;
             Height = profile.Height > 0 ? $"{profile.Height} cm" : "—";
             Weight = profile.CurrentWeight > 0 ? $"{profile.CurrentWeight} kg" : "—";
-            Age = profile.Age > 0 ? profile.Age.ToString() : "—";
+
+            // Возраст вычисляется на бэкенде или здесь
+            if (profile.Age > 0)
+            {
+                Age = profile.Age.ToString();
+            }
+            else if (!string.IsNullOrEmpty(profile.BirthDate) && DateTime.TryParse(profile.BirthDate, out var birthDate))
+            {
+                var today = DateTime.Today;
+                var age = today.Year - birthDate.Year;
+                if (birthDate.Date > today.AddYears(-age)) age--;
+                Age = age.ToString();
+            }
+            else
+            {
+                Age = "—";
+            }
+
             Gender = profile.Gender switch
             {
                 "male" => "Male",
@@ -143,7 +168,6 @@ namespace EatfitDesktop.ViewModels
             };
             BirthDate = !string.IsNullOrEmpty(profile.BirthDate) ? profile.BirthDate : "—";
 
-            // Нормы
             if (profile.Norms != null)
             {
                 Calories = $"{profile.Norms.Calories:F0} kcal";
@@ -179,7 +203,6 @@ namespace EatfitDesktop.ViewModels
 
         private async Task UpdateNormsAsync()
         {
-            // Создаём простое диалоговое окно для ввода норм
             var dialog = new Views.NormsDialog();
             if (dialog.ShowDialog() == true)
             {

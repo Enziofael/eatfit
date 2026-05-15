@@ -1,0 +1,95 @@
+﻿<UserControl x:Class="EatfitDesktop.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="30" MaxWidth="500">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Заголовок -->
+            <TextBlock Grid.Row="0" Text="Settings" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+
+            <!-- Раздел 1: Профиль -->
+            <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="20" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="Profile" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,15"/>
+                    
+                    <TextBlock Text="First Name" Style="{StaticResource LabelText}"/>
+                    <TextBox x:Name="FirstNameBox"/>
+                    
+                    <TextBlock Text="Last Name" Style="{StaticResource LabelText}"/>
+                    <TextBox x:Name="LastNameBox"/>
+                    
+                    <TextBlock Text="Height (cm)" Style="{StaticResource LabelText}"/>
+                    <TextBox x:Name="HeightBox"/>
+                    
+                    <TextBlock Text="Birth Date" Style="{StaticResource LabelText}"/>
+                    <DatePicker x:Name="BirthDatePicker"/>
+                    
+                    <TextBlock Text="Gender" Style="{StaticResource LabelText}"/>
+                    <ComboBox x:Name="GenderBox">
+                        <ComboBoxItem Content="Male" Tag="male"/>
+                        <ComboBoxItem Content="Female" Tag="female"/>
+                        <ComboBoxItem Content="Other" Tag="other"/>
+                    </ComboBox>
+
+                    <TextBlock x:Name="ProfileErrorText" Foreground="#e74c3c" FontSize="12" 
+                               TextWrapping="Wrap" Margin="0,5,0,0"/>
+                    
+                    <Button Content="Save Profile" Style="{StaticResource PrimaryButton}" 
+                            Width="150" Margin="0,15,0,0" Click="SaveProfile_Click"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Раздел 2: Смена логина -->
+            <Border Grid.Row="2" Background="White" CornerRadius="8" Padding="20" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="Change Login" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,15"/>
+                    
+                    <TextBlock Text="New Login" Style="{StaticResource LabelText}"/>
+                    <TextBox x:Name="NewLoginBox"/>
+                    
+                    <TextBlock Text="Current Password" Style="{StaticResource LabelText}"/>
+                    <PasswordBox x:Name="LoginPasswordBox"/>
+                    
+                    <TextBlock x:Name="LoginErrorText" Foreground="#e74c3c" FontSize="12" 
+                               TextWrapping="Wrap" Margin="0,5,0,0"/>
+                    
+                    <Button Content="Change Login" Style="{StaticResource PrimaryButton}" 
+                            Width="150" Margin="0,15,0,0" Click="ChangeLogin_Click"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Раздел 3: Смена пароля -->
+            <Border Grid.Row="3" Background="White" CornerRadius="8" Padding="20" Margin="0,0,0,15">
+                <StackPanel>
+                    <TextBlock Text="Change Password" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,15"/>
+                    
+                    <TextBlock Text="Current Password" Style="{StaticResource LabelText}"/>
+                    <PasswordBox x:Name="CurrentPasswordBox"/>
+                    
+                    <TextBlock Text="New Password" Style="{StaticResource LabelText}"/>
+                    <PasswordBox x:Name="NewPasswordBox"/>
+                    
+                    <TextBlock Text="Confirm New Password" Style="{StaticResource LabelText}"/>
+                    <PasswordBox x:Name="ConfirmPasswordBox"/>
+                    
+                    <TextBlock x:Name="PasswordErrorText" Foreground="#e74c3c" FontSize="12" 
+                               TextWrapping="Wrap" Margin="0,5,0,0"/>
+                    
+                    <Button Content="Change Password" Style="{StaticResource PrimaryButton}" 
+                            Width="150" Margin="0,15,0,0" Click="ChangePassword_Click"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Кнопка назад -->
+            <Button Grid.Row="4" Content="← Back to Profile" Style="{StaticResource LinkButton}" 
+                    HorizontalAlignment="Left" Click="Back_Click"/>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

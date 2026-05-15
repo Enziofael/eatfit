@@ -69,6 +69,8 @@ func main() {
 	accountRepo := postgres.NewAccountRepo(pgPool)
 	tokenRepo := redisRepo.NewTokenRepo(redisClient)
 	profileRepo := postgres.NewProfileRepo(pgPool)
+	mealRepo := postgres.NewMealRepo(pgPool)
+	consumptionRepo := postgres.NewConsumptionRepo(pgPool)
 
 	// ============================================
 	// Инициализируем сервисы
@@ -81,6 +83,8 @@ func main() {
 	emailService := service.NewEmailService(cfg)
 	passwordHasher := password.NewHasher(12)
 	profileService := service.NewProfileService(profileRepo)
+	mealService := service.NewMealService(mealRepo)
+	diaryService := service.NewDiaryService(consumptionRepo)
 
 	authService := service.NewAuthService(
 		accountRepo,
@@ -109,6 +113,12 @@ func main() {
 
 	profileHandler := grpcHandler.NewProfileHandler(profileService)
 	pb.RegisterProfileServiceServer(grpcServer, profileHandler) // ← теперь grpcServer существует
+
+	mealHandler := grpcHandler.NewMealHandler(mealService)
+	pb.RegisterMealServiceServer(grpcServer, mealHandler)
+
+	diaryHandler := grpcHandler.NewDiaryHandler(diaryService)
+	pb.RegisterDiaryServiceServer(grpcServer, diaryHandler)
 
 	// ============================================
 	// Reflection (только для разработки)

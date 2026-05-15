@@ -16,6 +16,10 @@ import enzio.android.eatfit.ui.screens.meals.MealsScreen
 import enzio.android.eatfit.ui.screens.messages.MessagesScreen
 import enzio.android.eatfit.ui.screens.profile.ProfileScreen
 import enzio.android.eatfit.ui.screens.profile.ProfileViewModel
+import enzio.android.eatfit.ui.screens.meals.MealsScreen
+import enzio.android.eatfit.ui.screens.meals.MealsViewModel
+import enzio.android.eatfit.ui.screens.diary.DiaryScreen
+import enzio.android.eatfit.ui.screens.diary.DiaryViewModel
 import enzio.android.eatfit.ui.theme.*
 
 enum class BottomNavItem(
@@ -35,7 +39,14 @@ fun MainScreen(
     viewModel: MainViewModel,
     refreshToken: String,
     profileViewModel: ProfileViewModel,
-    onLogout: () -> Unit
+    mealsViewModel: MealsViewModel,
+    diaryViewModel: DiaryViewModel,
+
+    onLogout: () -> Unit,
+    onSettingsClick: () -> Unit = {},
+    onMealAdd: () -> Unit = {},
+    onMealEdit: (String) -> Unit = {},
+    onMealClick: (String) -> Unit = {}
 ) {
     var selectedTab by remember { mutableStateOf(BottomNavItem.FEED) }
     var showLogoutDialog by remember { mutableStateOf(false) }
@@ -57,12 +68,21 @@ fun MainScreen(
         Box(modifier = Modifier.padding(paddingValues)) {
             when (selectedTab) {
                 BottomNavItem.FEED -> FeedScreen()
-                BottomNavItem.DIARY -> DiaryScreen()
-                BottomNavItem.MEALS -> MealsScreen()
+                BottomNavItem.DIARY -> DiaryScreen(
+                    viewModel = diaryViewModel,
+                    onMealClick = onMealClick  // ← использовать переданный колбэк
+                )
+                BottomNavItem.MEALS -> MealsScreen(
+                    viewModel = mealsViewModel,
+                    onAddClick = onMealAdd,
+                    onEditClick = onMealEdit,
+                    onMealClick = onMealClick,
+                )
                 BottomNavItem.MESSAGES -> MessagesScreen()
                 BottomNavItem.PROFILE -> ProfileScreen(
                     viewModel = profileViewModel,
-                    onLogoutClick = { showLogoutDialog = true }
+                    onLogoutClick = { showLogoutDialog = true },
+                    onSettingsClick = onSettingsClick
                 )
             }
         }

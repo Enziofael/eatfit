@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 
 data class ProfileState(
     val displayName: String = "Loading...",
+    val login: String = "",
     val bio: String = "",
     val height: String = "—",
     val weight: String = "—",
@@ -46,6 +47,7 @@ class ProfileViewModel(
             if (profile != null) {
                 _state.value = _state.value.copy(
                     displayName = profile.displayName(),
+                    login = profile.login,
                     bio = profile.bio,
                     height = if (profile.height > 0) "${profile.height} cm" else "—",
                     weight = if (profile.currentWeight > 0) "${profile.currentWeight} kg" else "—",

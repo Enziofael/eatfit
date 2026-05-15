@@ -1,0 +1,134 @@
+syntax = "proto3";
+
+package eatfit.v1;
+
+option java_package = "enzio.android.eatfit.proto";
+option java_multiple_files = true;
+option java_outer_classname = "MealProto";
+
+import "google/protobuf/timestamp.proto";
+
+service MealService {
+  rpc CreateMeal(CreateMealRequest) returns (CreateMealResponse);
+  rpc GetMeal(GetMealRequest) returns (GetMealResponse);
+  rpc UpdateMeal(UpdateMealRequest) returns (UpdateMealResponse);
+  rpc DeleteMeal(DeleteMealRequest) returns (DeleteMealResponse);
+  rpc ListMeals(ListMealsRequest) returns (ListMealsResponse);
+  rpc SearchMeals(SearchMealsRequest) returns (SearchMealsResponse);
+}
+
+message CreateMealRequest {
+  string user_id = 1;
+  string name = 2;
+  string description = 3;
+  string recipe = 4;
+  string image_url = 5;
+  // КБЖУ (если указаны — используются как есть, если не указаны и есть компоненты — вычисляются)
+  double calories = 6;
+  double proteins = 7;
+  double fats = 8;
+  double carbs = 9;
+  double water = 10;
+  // Компоненты (другие блюда)
+  repeated MealComponentInput components = 11;
+}
+
+message MealComponentInput {
+  string component_meal_id = 1;
+  double amount = 2; // количество в граммах (по умолчанию 100)
+}
+
+message CreateMealResponse {
+  bool success = 1;
+  MealData meal = 2;
+}
+
+message GetMealRequest {
+  string meal_id = 1;
+}
+
+message GetMealResponse {
+  MealData meal = 1;
+}
+
+message UpdateMealRequest {
+  string meal_id = 1;
+  string name = 2;
+  string description = 3;
+  string recipe = 4;
+  string image_url = 5;
+  double calories = 6;
+  double proteins = 7;
+  double fats = 8;
+  double carbs = 9;
+  double water = 10;
+  repeated MealComponentInput components = 11;
+}
+
+message UpdateMealResponse {
+  bool success = 1;
+  MealData meal = 2;
+}
+
+message DeleteMealRequest {
+  string meal_id = 1;
+}
+
+message DeleteMealResponse {
+  bool success = 1;
+}
+
+message ListMealsRequest {
+  string user_id = 1;
+  string sort_by = 2;
+  string sort_order = 3;
+  int32 page = 4;
+  int32 page_size = 5;
+}
+
+message ListMealsResponse {
+  repeated MealData meals = 1;
+  int32 total = 2;
+}
+
+message SearchMealsRequest {
+  string user_id = 1;
+  string query = 2;
+  string sort_by = 3;
+  string sort_order = 4;
+  int32 page = 5;
+  int32 page_size = 6;
+}
+
+message SearchMealsResponse {
+  repeated MealData meals = 1;
+  int32 total = 2;
+}
+
+message MealData {
+  string meal_id = 1;
+  string user_id = 2;
+  string name = 3;
+  string description = 4;
+  string recipe = 5;
+  string image_url = 6;
+  double calories = 7;
+  double proteins = 8;
+  double fats = 9;
+  double carbs = 10;
+  double water = 11;
+  repeated MealComponentData components = 12;
+  google.protobuf.Timestamp created_at = 13;
+  google.protobuf.Timestamp updated_at = 14;
+}
+
+message MealComponentData {
+  string component_meal_id = 1;
+  string component_name = 2;   // для быстрого отображения
+  double amount = 3;
+  double calories = 4;
+  double proteins = 5;
+  double fats = 6;
+  double carbs = 7;
+  double water = 8;
+}

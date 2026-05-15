@@ -1,0 +1,87 @@
+﻿<UserControl x:Class="EatfitDesktop.Views.MealsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Поиск и сортировка -->
+        <Border Grid.Row="0" Background="White" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBox x:Name="SearchBox" Grid.Column="0" 
+                         Margin="0,0,10,0" Height="35" VerticalContentAlignment="Center"
+                         KeyDown="SearchBox_KeyDown"/>
+                <Button Grid.Column="1" Content="🔍" Width="40" Height="35"
+                        Style="{StaticResource IconButton}" Click="Search_Click"/>
+                <ComboBox x:Name="SortBox" Grid.Column="2" Width="150" Height="35" Margin="10,0,0,0"
+                          SelectionChanged="SortBox_SelectionChanged">
+                    <ComboBoxItem Content="Calories" Tag="calories"/>
+                    <ComboBoxItem Content="Proteins" Tag="proteins"/>
+                    <ComboBoxItem Content="Fats" Tag="fats"/>
+                    <ComboBoxItem Content="Carbs" Tag="carbs"/>
+                    <ComboBoxItem Content="Water" Tag="water"/>
+                    <ComboBoxItem Content="Name" Tag="name"/>
+                    <ComboBoxItem Content="Newest" Tag="created_at" IsSelected="True"/>
+                </ComboBox>
+                <Button Grid.Column="3" Content="＋" Width="40" Height="35" Margin="10,0,0,0"
+                        Style="{StaticResource IconButton}" Click="AddMeal_Click"
+                        FontSize="18" FontWeight="Bold" Foreground="#11998e"/>
+            </Grid>
+        </Border>
+
+        <!-- Список блюд -->
+        <ScrollViewer Grid.Row="1">
+            <ItemsControl x:Name="MealsList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="White" CornerRadius="8" Padding="15" Margin="0,0,0,10"
+                                Cursor="Hand" MouseLeftButtonDown="Meal_Click">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0" Width="60" Height="60" CornerRadius="8"
+                                        Background="#667eea" Margin="0,0,15,0">
+                                    <TextBlock Text="🍽" FontSize="28" 
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="SemiBold"/>
+                                    <TextBlock Foreground="#666" FontSize="12">
+                                        <Run Text="{Binding Calories, StringFormat='{}{0:F0}'}"/>
+                                        <Run Text=" kcal | P:"/>
+                                        <Run Text="{Binding Proteins, StringFormat='{}{0:F0}'}"/>
+                                        <Run Text=" F:"/>
+                                        <Run Text="{Binding Fats, StringFormat='{}{0:F0}'}"/>
+                                        <Run Text=" C:"/>
+                                        <Run Text="{Binding Carbs, StringFormat='{}{0:F0}'}"/>
+                                    </TextBlock>
+                                </StackPanel>
+
+                                <Button Grid.Column="2" Content="✏️" Width="35" Height="35"
+                                        Style="{StaticResource IconButton}" Click="Edit_Click"/>
+                                <Button Grid.Column="3" Content="✕" Width="35" Height="35"
+                                        Style="{StaticResource IconButton}" Click="Delete_Click"
+                                        Foreground="#e74c3c"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

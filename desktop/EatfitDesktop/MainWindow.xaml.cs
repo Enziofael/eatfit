@@ -82,7 +82,7 @@ namespace EatfitDesktop.Views
             this.WindowState = WindowState.Normal;
             this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
 
-            var view = new MainView();
+            var view = new MainView(_sessionService);
             view.LogoutRequested += async () =>
             {
                 if (!string.IsNullOrEmpty(_sessionService.RefreshToken))

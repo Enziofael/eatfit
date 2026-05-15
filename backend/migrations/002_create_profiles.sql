@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS profiles (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_profiles_user_id ON profiles(user_id);
+CREATE INDEX IF NOT EXISTS idx_profiles_user_id ON profiles(user_id);
 
 -- Таблица истории веса
 CREATE TABLE IF NOT EXISTS weight_history (
@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS weight_history (
     recorded_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_weight_history_user_id ON weight_history(user_id);
-CREATE INDEX idx_weight_history_recorded_at ON weight_history(recorded_at DESC);
+CREATE INDEX IF NOT EXISTS idx_weight_history_user_id ON weight_history(user_id);
+CREATE INDEX IF NOT EXISTS idx_weight_history_recorded_at ON weight_history(recorded_at DESC);
 
 -- Таблица норм КБЖУ
 CREATE TABLE IF NOT EXISTS nutrition_norms (
@@ -38,8 +38,8 @@ CREATE TABLE IF NOT EXISTS nutrition_norms (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_nutrition_norms_user_id ON nutrition_norms(user_id);
-CREATE INDEX idx_nutrition_norms_created_at ON nutrition_norms(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_nutrition_norms_user_id ON nutrition_norms(user_id);
+CREATE INDEX IF NOT EXISTS idx_nutrition_norms_created_at ON nutrition_norms(created_at DESC);
 
 -- Функция для расчёта возраста
 CREATE OR REPLACE FUNCTION calculate_age(birth_date DATE)

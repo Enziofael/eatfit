@@ -10,11 +10,14 @@ import enzio.android.eatfit.proto.RegisterRequest as ProtoRegisterRequest
 import enzio.android.eatfit.proto.ResetPasswordRequest
 import enzio.android.eatfit.proto.VerifyEmailRequest
 import enzio.android.eatfit.proto.LoginRequest as ProtoLoginRequest
+import enzio.android.eatfit.proto.ChangeLoginRequest
+import enzio.android.eatfit.proto.ChangePasswordRequest
 import io.grpc.ManagedChannel
 import io.grpc.okhttp.OkHttpChannelBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
+
 
 class GrpcAuthService(
     private val serverUrl: String = "192.168.0.10",
@@ -149,6 +152,35 @@ class GrpcAuthService(
             } catch (_: Exception) {
                 // Игнорируем ошибки
             }
+        }
+    }
+
+    suspend fun changeLogin(userId: String, newLogin: String, password: String): AuthResult = withContext(Dispatchers.IO) {
+        try {
+            val request = ChangeLoginRequest.newBuilder()
+                .setUserId(userId)
+                .setNewLogin(newLogin)
+                .setPassword(password)
+                .build()
+            val response = stub.changeLogin(request)
+            AuthResult(success = response.success, message = response.message)
+        } catch (e: Exception) {
+            AuthResult(success = false, message = e.message ?: "Error")
+        }
+    }
+
+    suspend fun changePassword(userId: String, currentPassword: String, newPassword: String, confirmPassword: String): AuthResult = withContext(Dispatchers.IO) {
+        try {
+            val request = ChangePasswordRequest.newBuilder()
+                .setUserId(userId)
+                .setCurrentPassword(currentPassword)
+                .setNewPassword(newPassword)
+                .setPasswordConfirmation(confirmPassword)
+                .build()
+            val response = stub.changePassword(request)
+            AuthResult(success = response.success, message = response.message)
+        } catch (e: Exception) {
+            AuthResult(success = false, message = e.message ?: "Error")
         }
     }
 }

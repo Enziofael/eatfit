@@ -114,6 +114,12 @@ service AuthService {
   //
   // Устанавливает новый пароль по коду из письма.
   rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+
+  // ChangeLogin - смена логина (требует подтверждения паролем)
+  rpc ChangeLogin(ChangeLoginRequest) returns (ChangeLoginResponse);
+
+  // ChangePassword - смена пароля (требует подтверждения текущим паролем)
+  rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
 }
 
 // --------------------------------------------------------------------------
@@ -330,6 +336,33 @@ message ResetPasswordRequest {
 }
 
 message ResetPasswordResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+
+
+
+message ChangeLoginRequest {
+  string user_id = 1;
+  string new_login = 2;
+  string password = 3; // текущий пароль для подтверждения
+}
+
+message ChangeLoginResponse {
+  bool success = 1;
+  string message = 2;
+  string new_login = 3;
+}
+
+message ChangePasswordRequest {
+  string user_id = 1;
+  string current_password = 2;
+  string new_password = 3;
+  string password_confirmation = 4;
+}
+
+message ChangePasswordResponse {
   bool success = 1;
   string message = 2;
 }

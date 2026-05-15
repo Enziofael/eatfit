@@ -1,27 +1,14 @@
-﻿using Eatfit.V1;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace EatfitDesktop.Views
 {
-    /// <summary>
-    /// Interaction logic for ProfileView.xaml
-    /// </summary>
     public partial class ProfileView : UserControl
     {
         public event Action? LogoutRequested;
+        public event Action? SettingsRequested;
+
         public ProfileView()
         {
             InitializeComponent();
@@ -36,6 +23,11 @@ namespace EatfitDesktop.Views
             {
                 LogoutRequested?.Invoke();
             }
+        }
+
+        private void Settings_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsRequested?.Invoke();
         }
     }
 }

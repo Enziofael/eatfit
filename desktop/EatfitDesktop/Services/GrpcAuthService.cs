@@ -204,6 +204,46 @@ namespace EatfitDesktop.Services
             }
         }
 
+        public async Task<AuthResult> ChangeLoginAsync(string userId, string newLogin, string password)
+        {
+            try
+            {
+                var request = new ChangeLoginRequest
+                {
+                    UserId = userId,
+                    NewLogin = newLogin,
+                    Password = password
+                };
+                var response = await _client.ChangeLoginAsync(request);
+                return new AuthResult { Success = response.Success, Message = response.Message };
+            }
+            catch (RpcException ex)
+            {
+                return new AuthResult { Success = false, Message = ex.Status.Detail };
+            }
+        }
+
+        public async Task<AuthResult> ChangePasswordAsync(string userId, string currentPassword,
+            string newPassword, string confirmPassword)
+        {
+            try
+            {
+                var request = new ChangePasswordRequest
+                {
+                    UserId = userId,
+                    CurrentPassword = currentPassword,
+                    NewPassword = newPassword,
+                    PasswordConfirmation = confirmPassword
+                };
+                var response = await _client.ChangePasswordAsync(request);
+                return new AuthResult { Success = response.Success, Message = response.Message };
+            }
+            catch (RpcException ex)
+            {
+                return new AuthResult { Success = false, Message = ex.Status.Detail };
+            }
+        }
+
         public void Dispose()
         {
             if (_disposed) return;

@@ -58,6 +58,9 @@ fun ProfileScreen(
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(state.displayName, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                if (state.login.isNotEmpty()) {  // ← добавить
+                    Text(state.login, color = GraySubText, fontSize = 14.sp)
+                }
                 if (state.bio.isNotEmpty()) {
                     Text(state.bio, color = GrayText, fontSize = 14.sp)
                 }

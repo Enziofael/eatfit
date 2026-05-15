@@ -5,6 +5,9 @@ import enzio.android.eatfit.proto.ProfileData
 import enzio.android.eatfit.proto.ProfileServiceGrpc
 import enzio.android.eatfit.proto.SetNormsRequest
 import enzio.android.eatfit.proto.SetWeightRequest
+import enzio.android.eatfit.proto.UpdateProfileRequest
+import enzio.android.eatfit.proto.GetWeightHistoryRequest
+import enzio.android.eatfit.proto.WeightEntry
 import io.grpc.ManagedChannel
 import io.grpc.okhttp.OkHttpChannelBuilder
 import kotlinx.coroutines.Dispatchers
@@ -59,6 +62,37 @@ class GrpcProfileService(
             stub.setNorms(request).success
         } catch (e: Exception) {
             false
+        }
+    }
+
+    suspend fun updateProfile(
+        userId: String, firstName: String, lastName: String,
+        height: Double, birthDate: String, gender: String
+    ): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val request = UpdateProfileRequest.newBuilder()
+                .setUserId(userId)
+                .setFirstName(firstName)
+                .setLastName(lastName)
+                .setHeight(height)
+                .setBirthDate(birthDate)
+                .setGender(gender)
+                .build()
+            stub.updateProfile(request).success
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun getWeightHistory(userId: String): List<WeightEntry> = withContext(Dispatchers.IO) {
+        try {
+            val request = GetWeightHistoryRequest.newBuilder()
+                .setUserId(userId)
+                .setLimit(365)
+                .build()
+            stub.getWeightHistory(request).entriesList
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 

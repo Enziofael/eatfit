@@ -20,6 +20,7 @@
                 </Border>
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="{Binding DisplayName}" FontSize="24" FontWeight="Bold"/>
+                    <TextBlock Text="{Binding Login}" Foreground="#999" FontSize="13" Margin="0,2,0,0"/>
                     <TextBlock Text="{Binding Bio}" Foreground="#666" FontSize="13" TextWrapping="Wrap"/>
                 </StackPanel>
             </StackPanel>
@@ -28,7 +29,8 @@
                 <!-- Кнопка настроек -->
                 <Button  Content="⚙️ Settings" 
                     Style="{StaticResource LinkButton}" Margin="0,0,10,0"
-                    HorizontalAlignment="Left"/>
+                    HorizontalAlignment="Left"
+                     Click="Settings_Click"/>
                 <Button  Content="🚪 Logout" 
                     Style="{StaticResource LinkButton}"
                     HorizontalAlignment="Center"

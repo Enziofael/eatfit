@@ -62,6 +62,20 @@ namespace EatfitDesktop.Services
             }
         }
 
+        public async Task<List<WeightEntry>> GetWeightHistoryAsync(string userId)
+        {
+            try
+            {
+                var response = await _client.GetWeightHistoryAsync(new GetWeightHistoryRequest
+                {
+                    UserId = userId,
+                    Limit = 365
+                });
+                return new List<WeightEntry>(response.Entries);
+            }
+            catch { return new(); }
+        }
+
         public async Task<bool> UpdateNormsAsync(string userId, double calories, double proteins, double fats, double carbs, double water)
         {
             try
@@ -76,6 +90,29 @@ namespace EatfitDesktop.Services
                     Water = water
                 };
                 var response = await _client.SetNormsAsync(request);
+                return response.Success;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateProfileAsync(string userId, string firstName, string lastName,
+                                                    double? height, string birthDate, string gender)
+        {
+            try
+            {
+                var request = new UpdateProfileRequest
+                {
+                    UserId = userId,
+                    FirstName = firstName ?? "",
+                    LastName = lastName ?? "",
+                    Height = height ?? 0,
+                    BirthDate = birthDate ?? "",
+                    Gender = gender ?? ""
+                };
+                var response = await _client.UpdateProfileAsync(request);
                 return response.Success;
             }
             catch

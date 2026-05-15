@@ -249,3 +249,38 @@ func (h *AuthHandler) ResetPassword(ctx context.Context, req *pb.ResetPasswordRe
 		Message: "Password has been reset successfully. You can now login with your new password.",
 	}, nil
 }
+
+func (h *AuthHandler) ChangeLogin(ctx context.Context, req *pb.ChangeLoginRequest) (*pb.ChangeLoginResponse, error) {
+	userID, err := uuid.Parse(req.GetUserId())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid user ID")
+	}
+
+	err = h.authService.ChangeLogin(ctx, userID, req.GetNewLogin(), req.GetPassword())
+	if err != nil {
+		return nil, handleAuthError(err)
+	}
+
+	return &pb.ChangeLoginResponse{
+		Success:  true,
+		Message:  "Login changed successfully",
+		NewLogin: req.GetNewLogin(),
+	}, nil
+}
+
+func (h *AuthHandler) ChangePassword(ctx context.Context, req *pb.ChangePasswordRequest) (*pb.ChangePasswordResponse, error) {
+	userID, err := uuid.Parse(req.GetUserId())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid user ID")
+	}
+
+	err = h.authService.ChangePassword(ctx, userID, req.GetCurrentPassword(), req.GetNewPassword(), req.GetPasswordConfirmation())
+	if err != nil {
+		return nil, handleAuthError(err)
+	}
+
+	return &pb.ChangePasswordResponse{
+		Success: true,
+		Message: "Password changed successfully",
+	}, nil
+}

@@ -36,7 +36,30 @@ func (h *ProfileHandler) GetProfile(ctx context.Context, req *pb.GetProfileReque
 }
 
 func (h *ProfileHandler) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequest) (*pb.UpdateProfileResponse, error) {
-	return &pb.UpdateProfileResponse{Success: true}, nil
+	userID, err := uuid.Parse(req.GetUserId())
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid user ID")
+	}
+
+	updateReq := &model.UpdateProfileRequest{
+		FirstName: strPtr(req.GetFirstName()),
+		LastName:  strPtr(req.GetLastName()),
+		AvatarURL: strPtr(req.GetAvatarUrl()),
+		Height:    floatPtr(req.GetHeight()),
+		BirthDate: strPtr(req.GetBirthDate()),
+		Gender:    strPtr(req.GetGender()),
+		Bio:       strPtr(req.GetBio()),
+	}
+
+	profile, err := h.profileService.UpdateProfile(ctx, userID, updateReq)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to update profile: %v", err)
+	}
+
+	return &pb.UpdateProfileResponse{
+		Success: true,
+		Profile: convertToProto(profile),
+	}, nil
 }
 
 func (h *ProfileHandler) SetWeight(ctx context.Context, req *pb.SetWeightRequest) (*pb.SetWeightResponse, error) {
@@ -114,6 +137,20 @@ func (h *ProfileHandler) GetWeightHistory(ctx context.Context, req *pb.GetWeight
 	}
 
 	return &pb.GetWeightHistoryResponse{Entries: pbEntries}, nil
+}
+
+func strPtr(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
+}
+
+func floatPtr(f float64) *float64 {
+	if f == 0 {
+		return nil
+	}
+	return &f
 }
 
 func convertToProto(p *model.Profile) *pb.ProfileData {

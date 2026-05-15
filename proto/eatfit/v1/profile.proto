@@ -15,6 +15,7 @@ service ProfileService {
     rpc SetWeight(SetWeightRequest) returns (SetWeightResponse);
     rpc SetNorms(SetNormsRequest) returns (SetNormsResponse);
     rpc GetWeightHistory(GetWeightHistoryRequest) returns (GetWeightHistoryResponse);
+    
 }
 
 // --------------------------------------------------------------------------

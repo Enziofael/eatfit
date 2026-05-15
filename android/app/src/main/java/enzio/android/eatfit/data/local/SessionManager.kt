@@ -5,7 +5,9 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 
 private val Context.dataStore by preferencesDataStore(name = "session")
 
@@ -30,6 +32,16 @@ class SessionManager(private val context: Context) {
     val refreshToken: Flow<String?> = context.dataStore.data.map { prefs ->
         prefs[KEY_REFRESH_TOKEN]
     }
+
+    // Синхронные геттеры для использования в ViewModel
+    val userId: String?
+        get() = runBlocking { context.dataStore.data.first()[KEY_USER_ID] }
+
+    val email: String?
+        get() = runBlocking { context.dataStore.data.first()[KEY_EMAIL] }
+
+    val login: String?
+        get() = runBlocking { context.dataStore.data.first()[KEY_LOGIN] }
 
     suspend fun saveSession(
         accessToken: String,

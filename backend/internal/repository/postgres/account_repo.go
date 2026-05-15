@@ -323,3 +323,34 @@ func (r *AccountRepo) UpdatePassword(ctx context.Context, id uuid.UUID, password
 
 	return nil
 }
+
+// ChangeLogin меняет логин пользователя
+func (r *AccountRepo) ChangeLogin(ctx context.Context, id uuid.UUID, newLogin string) error {
+	query := `UPDATE users SET login = $2, updated_at = NOW() WHERE id = $1`
+	_, err := r.pool.Exec(ctx, query, id, newLogin)
+	if err != nil {
+		return fmt.Errorf("failed to change login: %w", err)
+	}
+	return nil
+}
+
+// ChangePassword меняет пароль пользователя
+func (r *AccountRepo) ChangePassword(ctx context.Context, id uuid.UUID, passwordHash string) error {
+	query := `UPDATE users SET password_hash = $2, updated_at = NOW() WHERE id = $1`
+	_, err := r.pool.Exec(ctx, query, id, passwordHash)
+	if err != nil {
+		return fmt.Errorf("failed to change password: %w", err)
+	}
+	return nil
+}
+
+// VerifyPassword возвращает хеш пароля для проверки
+func (r *AccountRepo) GetPasswordHash(ctx context.Context, id uuid.UUID) (string, error) {
+	query := `SELECT password_hash FROM users WHERE id = $1`
+	var hash string
+	err := r.pool.QueryRow(ctx, query, id).Scan(&hash)
+	if err != nil {
+		return "", fmt.Errorf("failed to get password hash: %w", err)
+	}
+	return hash, nil
+}

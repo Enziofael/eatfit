@@ -440,3 +440,66 @@ func (s *AuthService) ResetPassword(ctx context.Context, resetToken, code, newPa
 
 	return nil
 }
+
+// ChangeLogin меняет логин
+func (s *AuthService) ChangeLogin(ctx context.Context, userID uuid.UUID, newLogin, password string) error {
+	// Валидация логина
+	if err := s.loginValidator.Validate(newLogin); err != nil {
+		return fmt.Errorf("invalid login: %w", err)
+	}
+
+	// Проверяем уникальность логина
+	exists, err := s.accountRepo.IsLoginExists(ctx, newLogin)
+	if err != nil {
+		return fmt.Errorf("failed to check login: %w", err)
+	}
+	if exists {
+		return fmt.Errorf("login already exists")
+	}
+
+	// Получаем аккаунт
+	account, err := s.accountRepo.GetAccountByID(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("account not found")
+	}
+
+	// Проверяем пароль
+	if !s.passwordHasher.VerifyPassword(password, account.PasswordHash) {
+		return fmt.Errorf("invalid password")
+	}
+
+	// Меняем логин
+	return s.accountRepo.ChangeLogin(ctx, userID, newLogin)
+}
+
+// ChangePassword меняет пароль
+func (s *AuthService) ChangePassword(ctx context.Context, userID uuid.UUID, currentPassword, newPassword, confirmation string) error {
+	// Валидация пароля
+	if err := s.passwordValidator.ValidatePassword(newPassword); err != nil {
+		return err
+	}
+
+	if newPassword != confirmation {
+		return fmt.Errorf("password and confirmation do not match")
+	}
+
+	// Получаем аккаунт
+	account, err := s.accountRepo.GetAccountByID(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("account not found")
+	}
+
+	// Проверяем текущий пароль
+	if !s.passwordHasher.VerifyPassword(currentPassword, account.PasswordHash) {
+		return fmt.Errorf("invalid current password")
+	}
+
+	// Хешируем новый пароль
+	passwordHash, err := s.passwordHasher.HashPassword(newPassword)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	// Меняем пароль
+	return s.accountRepo.ChangePassword(ctx, userID, passwordHash)
+}

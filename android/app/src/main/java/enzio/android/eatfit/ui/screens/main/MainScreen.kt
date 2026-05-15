@@ -15,6 +15,7 @@ import enzio.android.eatfit.ui.screens.feed.FeedScreen
 import enzio.android.eatfit.ui.screens.meals.MealsScreen
 import enzio.android.eatfit.ui.screens.messages.MessagesScreen
 import enzio.android.eatfit.ui.screens.profile.ProfileScreen
+import enzio.android.eatfit.ui.screens.profile.ProfileViewModel
 import enzio.android.eatfit.ui.theme.*
 
 enum class BottomNavItem(
@@ -33,6 +34,7 @@ enum class BottomNavItem(
 fun MainScreen(
     viewModel: MainViewModel,
     refreshToken: String,
+    profileViewModel: ProfileViewModel,
     onLogout: () -> Unit
 ) {
     var selectedTab by remember { mutableStateOf(BottomNavItem.FEED) }
@@ -59,6 +61,7 @@ fun MainScreen(
                 BottomNavItem.MEALS -> MealsScreen()
                 BottomNavItem.MESSAGES -> MessagesScreen()
                 BottomNavItem.PROFILE -> ProfileScreen(
+                    viewModel = profileViewModel,
                     onLogoutClick = { showLogoutDialog = true }
                 )
             }

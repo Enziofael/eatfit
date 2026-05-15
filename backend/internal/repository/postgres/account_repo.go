@@ -306,3 +306,20 @@ func (r *AccountRepo) IsLoginExists(ctx context.Context, login string) (bool, er
 
 	return exists, nil
 }
+
+// UpdatePassword обновляет пароль пользователя
+func (r *AccountRepo) UpdatePassword(ctx context.Context, id uuid.UUID, passwordHash string) error {
+	query := `
+		UPDATE users
+		SET password_hash = $2,
+		    updated_at = NOW()
+		WHERE id = $1
+	`
+
+	_, err := r.pool.Exec(ctx, query, id, passwordHash)
+	if err != nil {
+		return fmt.Errorf("failed to update password: %w", err)
+	}
+
+	return nil
+}

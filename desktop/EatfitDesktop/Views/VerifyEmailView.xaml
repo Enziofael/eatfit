@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="EatfitDesktop.Views.VerifyEmailView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Height="280" Width="380">
+    <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Verify Email" Style="{StaticResource HeaderText}"/>
+
+        <TextBlock Grid.Row="1" Text="Enter the 6-digit code sent to your email" 
+                   TextWrapping="Wrap" Margin="0,0,0,15" Foreground="#666"/>
+
+        <TextBlock Grid.Row="2" Text="Verification Code" Style="{StaticResource LabelText}"/>
+        <TextBox Grid.Row="3" Text="{Binding VerificationCode, UpdateSourceTrigger=PropertyChanged}"
+                 FontSize="20" TextAlignment="Center" MaxLength="6" Height="45"/>
+
+        <TextBlock Grid.Row="4" Text="{Binding ErrorMessage}" Foreground="#e74c3c" 
+                   TextWrapping="Wrap" FontSize="12" Margin="0,5"/>
+
+        <StackPanel Grid.Row="5" Margin="0,15,0,0">
+            <Button Content="Verify Email" Command="{Binding VerifyCommand}" 
+                    Background="#11998e" Foreground="White" FontWeight="Bold"
+                    Height="40" BorderThickness="0" Cursor="Hand">
+                <Button.Resources>
+                    <Style TargetType="Border">
+                        <Setter Property="CornerRadius" Value="8"/>
+                    </Style>
+                </Button.Resources>
+            </Button>
+            <Button Content="← Back to registration" Command="{Binding BackCommand}" 
+                    Style="{StaticResource SubLinkButton}" Margin="0,10,0,0"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

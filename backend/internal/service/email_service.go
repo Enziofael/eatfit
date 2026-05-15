@@ -214,6 +214,91 @@ const welcomeTemplate = `<!DOCTYPE html>
 </body>
 </html>`
 
+const passwordResetTemplate = `<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .content {
+            padding: 30px;
+        }
+        .code-box {
+            background: #f8f9fa;
+            border: 2px dashed #f5576c;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .code {
+            font-size: 32px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            color: #f5576c;
+            font-family: 'Courier New', monospace;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #6c757d;
+            font-size: 12px;
+        }
+        .warning {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Password Reset</h1>
+        </div>
+        <div class="content">
+            <h2>Reset Your Password</h2>
+            <p>We received a request to reset your password. Use the code below:</p>
+            
+            <div class="code-box">
+                <p style="margin: 0 0 10px 0; color: #6c757d;">Reset code:</p>
+                <div class="code">{{CODE}}</div>
+            </div>
+            
+            <p>This code will expire in <strong>15 minutes</strong>.</p>
+            
+            <p class="warning">⚠️ If you didn't request this, please ignore this email and ensure your account is secure.</p>
+        </div>
+        <div class="footer">
+            <p>© 2025 Eatfit. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>`
+
 // NewEmailService создаёт новый экземпляр EmailService
 func NewEmailService(cfg *config.Config) *EmailService {
 	var mailer EmailSender
@@ -272,4 +357,11 @@ func (m *MockEmailSender) Send(to, subject, body string) error {
 	log.Printf("Body: %s", body)
 	log.Printf(strings.Repeat("=", 50))
 	return nil
+}
+
+// SendPasswordResetEmail отправляет письмо для сброса пароля
+func (s *EmailService) SendPasswordResetEmail(to string, code string) error {
+	subject := "Eatfit - Password Reset"
+	body := strings.Replace(passwordResetTemplate, "{{CODE}}", code, 1)
+	return s.mailer.Send(to, subject, body)
 }

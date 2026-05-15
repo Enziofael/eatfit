@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"math/big"
+	"strings"
 	"time"
 
 	emailValidator "github.com/Enziofael/eatfit/backend/pkg/email"
@@ -336,4 +337,98 @@ func (s *AuthService) generateVerificationCode() (string, error) {
 		code += n.String()
 	}
 	return code, nil
+}
+
+// ForgotPassword отправляет код сброса пароля
+func (s *AuthService) ForgotPassword(ctx context.Context, loginIdentifier string) (string, error) {
+	// Ищем пользователя
+	var account *model.Account
+	var err error
+
+	if emailValidator.NewValidator().Validate(loginIdentifier) == nil {
+		account, err = s.accountRepo.GetAccountByEmail(ctx, loginIdentifier)
+	} else {
+		account, err = s.accountRepo.GetAccountByLogin(ctx, loginIdentifier)
+	}
+
+	if err != nil {
+		// Не раскрываем, существует ли аккаунт
+		return "", nil
+	}
+
+	// Генерируем код
+	verificationCode, err := s.generateVerificationCode()
+	if err != nil {
+		return "", fmt.Errorf("failed to generate code: %w", err)
+	}
+
+	// Генерируем reset токен
+	resetToken := uuid.New().String()
+
+	// Сохраняем код в Redis с привязкой к reset токену
+	expiresAt := time.Now().Add(15 * time.Minute)
+	key := fmt.Sprintf("password_reset:%s", resetToken)
+	// Сохраняем: account_id, code, новый пароль пока пустой
+	data := fmt.Sprintf("%s|%s", account.ID.String(), verificationCode)
+	if err := s.tokenRepo.SavePasswordResetToken(ctx, key, data, expiresAt); err != nil {
+		return "", fmt.Errorf("failed to save reset token: %w", err)
+	}
+
+	// Отправляем код на email
+	if err := s.emailService.SendPasswordResetEmail(account.Email, verificationCode); err != nil {
+		return "", fmt.Errorf("failed to send email: %w", err)
+	}
+
+	return resetToken, nil
+}
+
+// ResetPassword сбрасывает пароль
+func (s *AuthService) ResetPassword(ctx context.Context, resetToken, code, newPassword, confirmation string) error {
+	// Валидация пароля
+	if err := s.passwordValidator.ValidatePassword(newPassword); err != nil {
+		return err
+	}
+
+	if newPassword != confirmation {
+		return fmt.Errorf("password and confirmation do not match")
+	}
+
+	// Получаем данные из Redis
+	key := fmt.Sprintf("password_reset:%s", resetToken)
+	data, err := s.tokenRepo.GetPasswordResetToken(ctx, key)
+	if err != nil {
+		return fmt.Errorf("invalid or expired reset token")
+	}
+
+	// Парсим данные: account_id|code
+	parts := strings.Split(data, "|")
+	if len(parts) != 2 {
+		return fmt.Errorf("invalid reset token data")
+	}
+
+	accountID, err := uuid.Parse(parts[0])
+	if err != nil {
+		return fmt.Errorf("invalid account id in token")
+	}
+
+	storedCode := parts[1]
+	if storedCode != code {
+		return fmt.Errorf("invalid verification code")
+	}
+
+	// Хешируем новый пароль
+	passwordHash, err := s.passwordHasher.HashPassword(newPassword)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	// Обновляем пароль
+	if err := s.accountRepo.UpdatePassword(ctx, accountID, passwordHash); err != nil {
+		return fmt.Errorf("failed to update password: %w", err)
+	}
+
+	// Удаляем reset токен
+	_ = s.tokenRepo.DeletePasswordResetToken(ctx, key)
+
+	return nil
 }

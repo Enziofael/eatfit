@@ -112,3 +112,38 @@ func HashToken(token string) string {
 	hash := sha256.Sum256([]byte(token))
 	return hex.EncodeToString(hash[:])
 }
+
+// SavePasswordResetToken сохраняет токен сброса пароля
+func (r *TokenRepo) SavePasswordResetToken(ctx context.Context, key, data string, expiresAt time.Time) error {
+	ttl := time.Until(expiresAt)
+
+	err := r.client.Set(ctx, key, data, ttl).Err()
+	if err != nil {
+		return fmt.Errorf("failed to save password reset token: %w", err)
+	}
+
+	return nil
+}
+
+// GetPasswordResetToken получает данные сброса пароля
+func (r *TokenRepo) GetPasswordResetToken(ctx context.Context, key string) (string, error) {
+	data, err := r.client.Get(ctx, key).Result()
+	if err == redis.Nil {
+		return "", fmt.Errorf("reset token not found or expired")
+	}
+	if err != nil {
+		return "", fmt.Errorf("failed to get reset token: %w", err)
+	}
+
+	return data, nil
+}
+
+// DeletePasswordResetToken удаляет токен сброса пароля
+func (r *TokenRepo) DeletePasswordResetToken(ctx context.Context, key string) error {
+	err := r.client.Del(ctx, key).Err()
+	if err != nil {
+		return fmt.Errorf("failed to delete reset token: %w", err)
+	}
+
+	return nil
+}

@@ -216,3 +216,36 @@ func searchString(s, substr string) bool {
 	}
 	return false
 }
+
+// ForgotPassword обрабатывает запрос на восстановление пароля
+func (h *AuthHandler) ForgotPassword(ctx context.Context, req *pb.ForgotPasswordRequest) (*pb.ForgotPasswordResponse, error) {
+	resetToken, err := h.authService.ForgotPassword(ctx, req.GetLoginIdentifier())
+	if err != nil {
+		return nil, handleAuthError(err)
+	}
+
+	return &pb.ForgotPasswordResponse{
+		Success:    true,
+		Message:    "If the account exists, a reset code has been sent to your email.",
+		ResetToken: resetToken,
+	}, nil
+}
+
+// ResetPassword обрабатывает запрос на сброс пароля
+func (h *AuthHandler) ResetPassword(ctx context.Context, req *pb.ResetPasswordRequest) (*pb.ResetPasswordResponse, error) {
+	err := h.authService.ResetPassword(
+		ctx,
+		req.GetResetToken(),
+		req.GetVerificationCode(),
+		req.GetNewPassword(),
+		req.GetPasswordConfirmation(),
+	)
+	if err != nil {
+		return nil, handleAuthError(err)
+	}
+
+	return &pb.ResetPasswordResponse{
+		Success: true,
+		Message: "Password has been reset successfully. You can now login with your new password.",
+	}, nil
+}

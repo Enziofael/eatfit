@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/rand"
 	"fmt"
+	"log"
 	"math/big"
 	"strings"
 	"time"
@@ -29,6 +30,7 @@ type AuthService struct {
 	passwordValidator *password.Validator
 	emailValidator    *emailValidator.Validator
 	loginValidator    *loginValidator.Validator
+	profileService    *ProfileService
 }
 
 // NewAuthService создаёт новый экземпляр AuthService
@@ -38,6 +40,7 @@ func NewAuthService(
 	jwtService *JWTService,
 	emailService *EmailService,
 	passwordHasher *password.Hasher,
+	profileService *ProfileService, // ← ДОБАВИТЬ параметр
 ) *AuthService {
 	return &AuthService{
 		accountRepo:       accountRepo,
@@ -48,6 +51,7 @@ func NewAuthService(
 		passwordValidator: password.NewValidator(),
 		emailValidator:    emailValidator.NewValidator(),
 		loginValidator:    loginValidator.NewValidator(),
+		profileService:    profileService, // ← ДОБАВИТЬ
 	}
 }
 
@@ -125,6 +129,10 @@ func (s *AuthService) Register(ctx context.Context, req *model.RegisterAccountRe
 	// Отправка кода на email
 	if err := s.emailService.SendVerificationEmail(account.Email, verificationCode); err != nil {
 		return nil, "", fmt.Errorf("failed to send verification email: %w", err)
+	}
+
+	if err := s.profileService.CreateProfile(ctx, account.ID); err != nil {
+		log.Printf("Warning: failed to create profile for user %s: %v", account.ID, err)
 	}
 
 	return account, verificationCode, nil

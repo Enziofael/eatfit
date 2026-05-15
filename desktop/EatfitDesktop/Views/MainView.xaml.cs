@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EatfitDesktop.Services;
+using EatfitDesktop.ViewModels;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -43,43 +45,17 @@ namespace EatfitDesktop.Views
 
         private void ShowProfile()
         {
-            var stackPanel = new StackPanel
-            {
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            };
+            var profileService = new GrpcProfileService();
+            var sessionService = new SessionService();
 
-            stackPanel.Children.Add(new TextBlock
-            {
-                Text = "Profile",
-                FontSize = 32,
-                FontWeight = FontWeights.Bold,
-                Foreground = new SolidColorBrush(Color.FromRgb(0x66, 0x7E, 0xEA)),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 0, 0, 8)
-            });
+            var vm = new ProfileViewModel(profileService, sessionService);
+            var view = new ProfileView { DataContext = vm };
 
-            stackPanel.Children.Add(new TextBlock
-            {
-                Text = "Your profile will be here",
-                FontSize = 16,
-                Foreground = new SolidColorBrush(Color.FromRgb(0x66, 0x66, 0x66)),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 0, 0, 24)
-            });
+            view.LogoutRequested += () => LogoutRequested?.Invoke();
 
-            var logoutBtn = new Button
-            {
-                Content = "Logout",
-                Width = 200,
-                Height = 40,
-                Style = Application.Current.Resources["PrimaryButton"] as Style
-            };
-            logoutBtn.Click += (s, e) => LogoutRequested?.Invoke();
+            _ = vm.LoadProfileAsync();
 
-            stackPanel.Children.Add(logoutBtn);
-
-            ContentArea.Content = stackPanel;
+            ContentArea.Content = view;
         }
 
         private UIElement CreatePlaceholder(string title, string subtitle)

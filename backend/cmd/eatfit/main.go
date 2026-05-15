@@ -46,7 +46,6 @@ func main() {
 	}
 	defer pgPool.Close()
 
-	// Проверяем подключение к PostgreSQL
 	if err := pgPool.Ping(ctx); err != nil {
 		log.Fatalf("Failed to ping PostgreSQL: %v", err)
 	}
@@ -59,24 +58,29 @@ func main() {
 		DB:       cfg.RedisDB,
 	})
 
-	// Проверяем подключение к Redis
 	if err := redisClient.Ping(ctx).Err(); err != nil {
 		log.Fatalf("Failed to connect to Redis: %v", err)
 	}
 	log.Println("Connected to Redis")
 
+	// ============================================
 	// Инициализируем репозитории
+	// ============================================
 	accountRepo := postgres.NewAccountRepo(pgPool)
 	tokenRepo := redisRepo.NewTokenRepo(redisClient)
+	profileRepo := postgres.NewProfileRepo(pgPool)
 
+	// ============================================
 	// Инициализируем сервисы
+	// ============================================
 	jwtService := service.NewJWTService(
 		cfg.JWTSecret,
 		cfg.AccessTokenDuration,
 		cfg.RefreshTokenDuration,
 	)
 	emailService := service.NewEmailService(cfg)
-	passwordHasher := password.NewHasher(12) // bcrypt cost = 12
+	passwordHasher := password.NewHasher(12)
+	profileService := service.NewProfileService(profileRepo)
 
 	authService := service.NewAuthService(
 		accountRepo,
@@ -84,9 +88,12 @@ func main() {
 		jwtService,
 		emailService,
 		passwordHasher,
+		profileService, // ← передаём profileService
 	)
 
+	// ============================================
 	// Создаём gRPC сервер
+	// ============================================
 	grpcServer := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			loggingInterceptor(),
@@ -94,23 +101,31 @@ func main() {
 		),
 	)
 
+	// ============================================
 	// Регистрируем сервисы
+	// ============================================
 	authHandler := grpcHandler.NewAuthHandler(authService)
 	pb.RegisterAuthServiceServer(grpcServer, authHandler)
 
-	// Включаем reflection для отладки (только в development)
+	profileHandler := grpcHandler.NewProfileHandler(profileService)
+	pb.RegisterProfileServiceServer(grpcServer, profileHandler) // ← теперь grpcServer существует
+
+	// ============================================
+	// Reflection (только для разработки)
+	// ============================================
 	if cfg.AppEnv == "development" {
 		reflection.Register(grpcServer)
 		log.Println("gRPC reflection enabled")
 	}
 
-	// Запускаем gRPC сервер
+	// ============================================
+	// Запускаем сервер
+	// ============================================
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%s", cfg.GRPCPort))
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
-	// Graceful shutdown
 	go func() {
 		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)

@@ -173,7 +173,7 @@ func handleAuthError(err error) error {
 	switch {
 	case contains(errMsg, "email already exists"),
 		contains(errMsg, "login already exists"):
-		return status.Errorf(codes.AlreadyExists, errMsg)
+		return status.Errorf(codes.AlreadyExists, "%s", errMsg)
 
 	case contains(errMsg, "invalid email"),
 		contains(errMsg, "invalid login"),
@@ -181,20 +181,20 @@ func handleAuthError(err error) error {
 		contains(errMsg, "password and confirmation"),
 		contains(errMsg, "invalid user ID"),
 		contains(errMsg, "invalid verification code"):
-		return status.Errorf(codes.InvalidArgument, errMsg)
+		return status.Errorf(codes.InvalidArgument, "%s", errMsg)
 
 	case contains(errMsg, "email not verified"):
-		return status.Errorf(codes.FailedPrecondition, errMsg)
+		return status.Errorf(codes.FailedPrecondition, "%s", errMsg)
 
 	case contains(errMsg, "not found"),
 		contains(errMsg, "account not found"):
-		return status.Errorf(codes.NotFound, errMsg)
+		return status.Errorf(codes.NotFound, "%s", errMsg)
 
 	case contains(errMsg, "expired"):
-		return status.Errorf(codes.DeadlineExceeded, errMsg)
+		return status.Errorf(codes.DeadlineExceeded, "%s", errMsg)
 
 	case contains(errMsg, "too many"):
-		return status.Errorf(codes.ResourceExhausted, errMsg)
+		return status.Errorf(codes.ResourceExhausted, "%s", errMsg)
 
 	default:
 		// Логируем неизвестную ошибку

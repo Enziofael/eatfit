@@ -1,0 +1,127 @@
+syntax = "proto3";
+
+package eatfit.v1;
+
+option go_package = "github.com/Enziofael/eatfit/backend/api/gen/eatfit/v1;eatfitv1";
+
+import "google/protobuf/timestamp.proto";
+
+// --------------------------------------------------------------------------
+// ProfileService - сервис профилей пользователей
+// --------------------------------------------------------------------------
+service ProfileService {
+    rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
+    rpc UpdateProfile(UpdateProfileRequest) returns (UpdateProfileResponse);
+    rpc SetWeight(SetWeightRequest) returns (SetWeightResponse);
+    rpc SetNorms(SetNormsRequest) returns (SetNormsResponse);
+    rpc GetWeightHistory(GetWeightHistoryRequest) returns (GetWeightHistoryResponse);
+}
+
+// --------------------------------------------------------------------------
+// GetProfile
+// --------------------------------------------------------------------------
+message GetProfileRequest {
+    string user_id = 1;
+}
+
+message GetProfileResponse {
+    ProfileData profile = 1;
+}
+
+// --------------------------------------------------------------------------
+// UpdateProfile
+// --------------------------------------------------------------------------
+message UpdateProfileRequest {
+    string user_id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string avatar_url = 4;
+    double height = 5;
+    string birth_date = 6;
+    string gender = 7;
+    string bio = 8;
+}
+
+message UpdateProfileResponse {
+    bool success = 1;
+    ProfileData profile = 2;
+}
+
+// --------------------------------------------------------------------------
+// SetWeight
+// --------------------------------------------------------------------------
+message SetWeightRequest {
+    string user_id = 1;
+    double weight = 2;
+    string note = 3;
+}
+
+message SetWeightResponse {
+    bool success = 1;
+    double current_weight = 2;
+}
+
+// --------------------------------------------------------------------------
+// SetNorms
+// --------------------------------------------------------------------------
+message SetNormsRequest {
+    string user_id = 1;
+    double calories = 2;
+    double proteins = 3;
+    double fats = 4;
+    double carbs = 5;
+    double water = 6;
+}
+
+message SetNormsResponse {
+    bool success = 1;
+    NormsData norms = 2;
+}
+
+// --------------------------------------------------------------------------
+// GetWeightHistory
+// --------------------------------------------------------------------------
+message GetWeightHistoryRequest {
+    string user_id = 1;
+    int32 limit = 2;
+}
+
+message GetWeightHistoryResponse {
+    repeated WeightEntry entries = 1;
+}
+
+// --------------------------------------------------------------------------
+// Общие типы
+// --------------------------------------------------------------------------
+message ProfileData {
+    string user_id = 1;
+    string login = 2;
+    string email = 3;
+    string first_name = 4;
+    string last_name = 5;
+    string avatar_url = 6;
+    double height = 7;
+    double current_weight = 8;
+    string birth_date = 9;
+    int32 age = 10;
+    string gender = 11;
+    string bio = 12;
+    NormsData norms = 13;
+    google.protobuf.Timestamp created_at = 14;
+    google.protobuf.Timestamp updated_at = 15;
+}
+
+message NormsData {
+    double calories = 1;
+    double proteins = 2;
+    double fats = 3;
+    double carbs = 4;
+    double water = 5;
+    google.protobuf.Timestamp updated_at = 6;
+}
+
+message WeightEntry {
+    double weight = 1;
+    string note = 2;
+    google.protobuf.Timestamp recorded_at = 3;
+}
